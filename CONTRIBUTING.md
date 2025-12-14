@@ -34,7 +34,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 ### Prerequisites
 
-- Node.js 18+ and npm 9+
+- Node.js 20 LTS (recommended) and npm 9+
 - Windows 10/11 (for full development)
 - NVIDIA GPU (for hardware testing)
 - Git

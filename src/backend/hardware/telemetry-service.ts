@@ -1,11 +1,11 @@
 /**
- * Telemetry collection service
- * Continuous monitoring of GPU metrics
+ * Production Telemetry Collection Service
+ * Real-time GPU metrics collection using hardware interface
  */
 
 import { EventEmitter } from 'events';
-import { NvidiaAPI } from './nvidia-api';
 import { GPUTelemetry } from '../types';
+import { IGPUInterface } from './gpu-interface';
 import { logger } from '../utils/logger';
 
 class RingBuffer<T> {
@@ -20,6 +20,10 @@ class RingBuffer<T> {
     this.buffer = new Array<T | undefined>(capacity);
   }
 
+  getCapacity(): number {
+    return this.capacity;
+  }
+
   push(item: T): void {
     if (this.length < this.capacity) {
       this.buffer[(this.startIndex + this.length) % this.capacity] = item;
@@ -27,6 +31,7 @@ class RingBuffer<T> {
       return;
     }
 
+    // Overwrite oldest
     this.buffer[this.startIndex] = item;
     this.startIndex = (this.startIndex + 1) % this.capacity;
   }
@@ -61,8 +66,8 @@ class RingBuffer<T> {
   }
 }
 
-export class TelemetryCollector extends EventEmitter {
-  private nvapi: NvidiaAPI;
+export class TelemetryService extends EventEmitter {
+  private gpuInterface: IGPUInterface;
   private interval: number;
   private isCollecting: boolean;
   private collectionTimer?: NodeJS.Timeout;
@@ -70,9 +75,9 @@ export class TelemetryCollector extends EventEmitter {
   private maxHistorySize: number;
   private collectInFlight: boolean = false;
 
-  constructor(interval: number = 1000, maxHistorySize: number = 3600) {
+  constructor(gpuInterface: IGPUInterface, interval: number = 1000, maxHistorySize: number = 3600) {
     super();
-    this.nvapi = new NvidiaAPI();
+    this.gpuInterface = gpuInterface;
     this.interval = interval;
     this.isCollecting = false;
     this.telemetryHistory = new RingBuffer<GPUTelemetry>(maxHistorySize);
@@ -84,17 +89,20 @@ export class TelemetryCollector extends EventEmitter {
    */
   start(): void {
     if (this.isCollecting) {
-      logger.warn('TelemetryCollector', 'Already collecting telemetry');
+      logger.warn('TelemetryService', 'Already collecting telemetry');
       return;
     }
 
     this.isCollecting = true;
-    logger.info('TelemetryCollector', 'Starting telemetry collection', { interval: this.interval });
+    logger.info('TelemetryService', 'Starting telemetry collection', { interval: this.interval });
 
     this.collectionTimer = setInterval(async () => {
       await this.collect();
     }, this.interval);
     this.collectionTimer.unref?.();
+
+    // Collect immediately
+    void this.collect();
   }
 
   /**
@@ -112,17 +120,20 @@ export class TelemetryCollector extends EventEmitter {
       this.collectionTimer = undefined;
     }
 
-    logger.info('TelemetryCollector', 'Stopped telemetry collection');
+    logger.info('TelemetryService', 'Stopped telemetry collection');
   }
 
   /**
    * Collect a single telemetry sample
    */
   private async collect(): Promise<void> {
-    if (this.collectInFlight) return;
+    if (this.collectInFlight) {
+      return;
+    }
+
     this.collectInFlight = true;
     try {
-      const telemetry = await this.nvapi.getTelemetry();
+      const telemetry = await this.gpuInterface.getTelemetry();
 
       // Add to history
       this.telemetryHistory.push(telemetry);
@@ -133,7 +144,7 @@ export class TelemetryCollector extends EventEmitter {
       // Check for issues
       this.checkForIssues(telemetry);
     } catch (error) {
-      logger.error('TelemetryCollector', 'Failed to collect telemetry', error);
+      logger.error('TelemetryService', 'Failed to collect telemetry', error);
       this.emit('error', error);
     } finally {
       this.collectInFlight = false;
@@ -150,25 +161,25 @@ export class TelemetryCollector extends EventEmitter {
   /**
    * Get telemetry history
    */
-  getHistory(duration?: number): GPUTelemetry[] {
+  getHistory(durationMs?: number): GPUTelemetry[] {
     const all = this.telemetryHistory.toArray();
-    if (!duration) return all;
+    if (!durationMs) return all;
 
-    const cutoff = Date.now() - duration;
+    const cutoff = Date.now() - durationMs;
     return all.filter(t => t.timestamp >= cutoff);
   }
 
   /**
    * Get average metrics over a time period
    */
-  getAverageMetrics(duration: number): {
+  getAverageMetrics(durationMs: number): {
     avgCoreClock: number;
     avgMemoryClock: number;
     avgPowerDraw: number;
     avgTemperature: number;
     avgUtilization: number;
   } {
-    const history = this.getHistory(duration);
+    const history = this.getHistory(durationMs);
 
     if (history.length === 0) {
       return {
@@ -207,7 +218,7 @@ export class TelemetryCollector extends EventEmitter {
    */
   clearHistory(): void {
     this.telemetryHistory.clear();
-    logger.info('TelemetryCollector', 'Telemetry history cleared');
+    logger.info('TelemetryService', 'Telemetry history cleared');
   }
 
   /**
@@ -215,16 +226,16 @@ export class TelemetryCollector extends EventEmitter {
    */
   private checkForIssues(telemetry: GPUTelemetry): void {
     // Check for thermal throttling
-    if (telemetry.throttleReasons.includes('thermal' as any)) {
-      logger.warn('TelemetryCollector', 'Thermal throttling detected', {
+    if (telemetry.throttleReasons.some(r => r === 'thermal' as any)) {
+      logger.warn('TelemetryService', 'Thermal throttling detected', {
         temperature: telemetry.temperature,
       });
       this.emit('thermal-throttle', telemetry);
     }
 
     // Check for power throttling
-    if (telemetry.throttleReasons.includes('power' as any)) {
-      logger.warn('TelemetryCollector', 'Power throttling detected', {
+    if (telemetry.throttleReasons.some(r => r === 'power' as any)) {
+      logger.warn('TelemetryService', 'Power throttling detected', {
         powerDraw: telemetry.powerDraw,
       });
       this.emit('power-throttle', telemetry);
@@ -232,10 +243,18 @@ export class TelemetryCollector extends EventEmitter {
 
     // Check for high temperature
     if (telemetry.temperature > 85) {
-      logger.warn('TelemetryCollector', 'High temperature detected', {
+      logger.warn('TelemetryService', 'High temperature detected', {
         temperature: telemetry.temperature,
       });
       this.emit('high-temperature', telemetry);
+    }
+
+    // Check for critical temperature
+    if (telemetry.temperature > 95) {
+      logger.error('TelemetryService', 'CRITICAL TEMPERATURE', {
+        temperature: telemetry.temperature,
+      });
+      this.emit('critical-temperature', telemetry);
     }
   }
 
@@ -250,7 +269,7 @@ export class TelemetryCollector extends EventEmitter {
       this.start();
     }
 
-    logger.info('TelemetryCollector', 'Collection interval updated', { interval });
+    logger.info('TelemetryService', 'Collection interval updated', { interval });
   }
 
   /**
@@ -258,5 +277,28 @@ export class TelemetryCollector extends EventEmitter {
    */
   isActive(): boolean {
     return this.isCollecting;
+  }
+
+  /**
+   * Get collection statistics
+   */
+  getStats(): {
+    historySize: number;
+    maxHistorySize: number;
+    interval: number;
+    isCollecting: boolean;
+    oldestTimestamp?: number;
+    newestTimestamp?: number;
+  } {
+    const oldest = this.telemetryHistory.getOldest();
+    const newest = this.telemetryHistory.getLatest();
+    return {
+      historySize: this.telemetryHistory.size(),
+      maxHistorySize: this.maxHistorySize,
+      interval: this.interval,
+      isCollecting: this.isCollecting,
+      oldestTimestamp: oldest?.timestamp,
+      newestTimestamp: newest?.timestamp,
+    };
   }
 }

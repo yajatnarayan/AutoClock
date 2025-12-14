@@ -12,6 +12,7 @@ const execAsync = promisify(exec);
 
 export class NvidiaAPI {
   private gpuIndex: number;
+  private baselineClocks?: { graphics: number; memory: number };
 
   constructor(gpuIndex: number = 0) {
     this.gpuIndex = gpuIndex;
@@ -116,15 +117,33 @@ export class NvidiaAPI {
    */
   async applyClockOffset(offset: ClockOffset): Promise<void> {
     try {
-      // Apply core clock offset
-      await execAsync(
-        `nvidia-smi -i ${this.gpuIndex} --lock-gpu-clocks=${offset.core},${offset.core}`
-      );
+      // Treat 0/0 as "stock": remove any locks.
+      if (offset.core === 0 && offset.memory === 0) {
+        await this.resetClocks();
+        return;
+      }
 
-      // Apply memory clock offset
-      await execAsync(
-        `nvidia-smi -i ${this.gpuIndex} --lock-memory-clocks=${offset.memory},${offset.memory}`
-      );
+      const baseline = await this.getBaselineClocks();
+
+      const targetGraphics = baseline.graphics + offset.core;
+      const targetMemory = baseline.memory + offset.memory;
+
+      // nvidia-smi clock locking expects absolute frequencies (MHz), not offsets.
+      if (offset.core !== 0) {
+        await execAsync(
+          `nvidia-smi -i ${this.gpuIndex} --lock-gpu-clocks=${targetGraphics},${targetGraphics}`
+        );
+      } else {
+        await execAsync(`nvidia-smi -i ${this.gpuIndex} --reset-gpu-clocks`);
+      }
+
+      if (offset.memory !== 0) {
+        await execAsync(
+          `nvidia-smi -i ${this.gpuIndex} --lock-memory-clocks=${targetMemory},${targetMemory}`
+        );
+      } else {
+        await execAsync(`nvidia-smi -i ${this.gpuIndex} --reset-memory-clocks`);
+      }
 
       logger.info('NvidiaAPI', 'Clock offset applied', offset);
     } catch (error) {
@@ -144,6 +163,43 @@ export class NvidiaAPI {
     } catch (error) {
       logger.error('NvidiaAPI', 'Failed to reset clocks', error);
       throw new Error(`Failed to reset clocks: ${error}`);
+    }
+  }
+
+  private async getBaselineClocks(): Promise<{ graphics: number; memory: number }> {
+    if (this.baselineClocks) {
+      return this.baselineClocks;
+    }
+
+    try {
+      const query = [
+        'clocks.default_applications.graphics',
+        'clocks.default_applications.memory',
+        'clocks.current.graphics',
+        'clocks.current.memory',
+      ].join(',');
+
+      const { stdout } = await execAsync(
+        `nvidia-smi --query-gpu=${query} --format=csv,noheader,nounits -i ${this.gpuIndex}`
+      );
+
+      const values = stdout.trim().split(',').map(v => v.trim());
+
+      const defaultGraphics = parseFloat(values[0]);
+      const defaultMemory = parseFloat(values[1]);
+      if (Number.isFinite(defaultGraphics) && Number.isFinite(defaultMemory) && defaultGraphics > 0 && defaultMemory > 0) {
+        this.baselineClocks = { graphics: defaultGraphics, memory: defaultMemory };
+        return this.baselineClocks;
+      }
+
+      const currentGraphics = parseFloat(values[2]);
+      const currentMemory = parseFloat(values[3]);
+      this.baselineClocks = { graphics: currentGraphics, memory: currentMemory };
+      return this.baselineClocks;
+    } catch {
+      // Last resort: use 0 baseline.
+      this.baselineClocks = { graphics: 0, memory: 0 };
+      return this.baselineClocks;
     }
   }
 
@@ -171,8 +227,20 @@ export class NvidiaAPI {
    */
   async checkOverclockSupport(): Promise<boolean> {
     try {
-      const { stdout } = await execAsync('nvidia-smi --help');
-      return stdout.includes('--lock-gpu-clocks') && stdout.includes('--lock-memory-clocks');
+      // Validate by attempting a no-op lock/unlock cycle on current clocks.
+      const telemetry = await this.getTelemetry();
+
+      await execAsync(
+        `nvidia-smi -i ${this.gpuIndex} --lock-gpu-clocks=${telemetry.coreClock},${telemetry.coreClock}`
+      );
+      await execAsync(`nvidia-smi -i ${this.gpuIndex} --reset-gpu-clocks`);
+
+      await execAsync(
+        `nvidia-smi -i ${this.gpuIndex} --lock-memory-clocks=${telemetry.memoryClock},${telemetry.memoryClock}`
+      );
+      await execAsync(`nvidia-smi -i ${this.gpuIndex} --reset-memory-clocks`);
+
+      return true;
     } catch (error) {
       logger.error('NvidiaAPI', 'Failed to check overclock support', error);
       return false;

@@ -11,7 +11,6 @@ import {
   OptimizationStage,
   TuningConfiguration,
   BenchmarkResult,
-  ClockOffset,
 } from '../types';
 import { NvidiaAPI } from '../hardware/nvidia-api';
 import { TelemetryCollector } from '../hardware/telemetry-collector';
@@ -158,7 +157,7 @@ export class Optimizer extends EventEmitter {
   /**
    * Tune memory clocks
    */
-  private async tuneMemory(goal: OptimizationGoal): Promise<TuningConfiguration> {
+  private async tuneMemory(_goal: OptimizationGoal): Promise<TuningConfiguration> {
     logger.info('Optimizer', 'Starting memory tuning');
 
     let currentOffset = 0;
@@ -219,7 +218,7 @@ export class Optimizer extends EventEmitter {
    */
   private async tuneCore(
     baseConfig: TuningConfiguration,
-    goal: OptimizationGoal
+    _goal: OptimizationGoal
   ): Promise<TuningConfiguration> {
     logger.info('Optimizer', 'Starting core tuning');
 

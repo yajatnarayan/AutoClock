@@ -17,7 +17,10 @@ export class ServiceClient extends EventEmitter {
   private reconnectInterval: number = 5000;
   private reconnectTimer?: NodeJS.Timeout;
 
-  constructor(private serverUrl: string = 'ws://localhost:8080') {
+  constructor(
+    private serverUrl: string = 'ws://localhost:8080',
+    private authToken?: string
+  ) {
     super();
   }
 
@@ -121,7 +124,7 @@ export class ServiceClient extends EventEmitter {
       }
 
       const id = Math.random().toString(36).substring(7);
-      const message = { id, command, data };
+      const message = { id, command, data, authToken: this.authToken };
 
       const handler = (event: MessageEvent) => {
         const response = JSON.parse(event.data);
@@ -138,6 +141,13 @@ export class ServiceClient extends EventEmitter {
       this.ws.addEventListener('message', handler);
       this.ws.send(JSON.stringify(message));
     });
+  }
+
+  /**
+   * Update/clear the auth token used for commands.
+   */
+  setAuthToken(token?: string): void {
+    this.authToken = token;
   }
 
   /**
