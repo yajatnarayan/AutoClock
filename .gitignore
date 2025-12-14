@@ -8,12 +8,12 @@ build/
 out/
 
 # Logs
-logs/
+/logs/
 *.log
 npm-debug.log*
 
 # Runtime data
-profiles/
+/profiles/
 *.pid
 *.seed
 *.pid.lock
