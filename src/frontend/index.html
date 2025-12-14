@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoOC - Intelligent GPU Performance Tuning</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>AutoOC</h1>
+            <div class="header-status">
+                <span id="connection-status" class="status-indicator">●</span>
+                <span id="connection-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- GPU Info Card -->
+            <section class="card gpu-info">
+                <h2>GPU Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">GPU:</span>
+                        <span id="gpu-name">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Architecture:</span>
+                        <span id="gpu-arch">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">VRAM:</span>
+                        <span id="gpu-vram">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Driver:</span>
+                        <span id="gpu-driver">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Telemetry Dashboard -->
+            <section class="card telemetry">
+                <h2>Live Performance</h2>
+                <div class="telemetry-grid">
+                    <div class="metric">
+                        <div class="metric-label">Core Clock</div>
+                        <div class="metric-value" id="core-clock">0 MHz</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Memory Clock</div>
+                        <div class="metric-value" id="memory-clock">0 MHz</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Temperature</div>
+                        <div class="metric-value" id="temperature">0°C</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Power Draw</div>
+                        <div class="metric-value" id="power-draw">0 W</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">GPU Usage</div>
+                        <div class="metric-value" id="gpu-usage">0%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Fan Speed</div>
+                        <div class="metric-value" id="fan-speed">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Optimization Controls -->
+            <section class="card optimization">
+                <h2>One-Click Optimization</h2>
+                <div class="optimization-modes">
+                    <button class="mode-button" data-mode="max_performance">
+                        <span class="mode-icon">⚡</span>
+                        <span class="mode-name">Max Performance</span>
+                        <span class="mode-desc">Maximum FPS/Throughput</span>
+                    </button>
+                    <button class="mode-button" data-mode="balanced">
+                        <span class="mode-icon">⚖️</span>
+                        <span class="mode-name">Balanced</span>
+                        <span class="mode-desc">Best Performance/Watt</span>
+                    </button>
+                    <button class="mode-button" data-mode="quiet">
+                        <span class="mode-icon">🔇</span>
+                        <span class="mode-name">Quiet</span>
+                        <span class="mode-desc">Thermal & Noise Limited</span>
+                    </button>
+                </div>
+
+                <div id="optimization-progress" class="optimization-progress hidden">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <p id="progress-message">Initializing...</p>
+                </div>
+            </section>
+
+            <!-- Active Profile -->
+            <section class="card profile">
+                <h2>Active Profile</h2>
+                <div class="profile-info">
+                    <div class="profile-name" id="active-profile-name">Default (Stock)</div>
+                    <div class="profile-details">
+                        <span id="profile-mode">Balanced</span>
+                        <span id="profile-clocks">Core: +0MHz | Memory: +0MHz</span>
+                    </div>
+                </div>
+                <button id="manage-profiles-btn" class="secondary-button">Manage Profiles</button>
+            </section>
+        </main>
+
+        <!-- Profiles Modal -->
+        <div id="profiles-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Manage Profiles</h2>
+                    <button class="close-button" id="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="profiles-list" class="profiles-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="import-profile-btn" class="secondary-button">Import Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
