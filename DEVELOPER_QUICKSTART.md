@@ -109,6 +109,17 @@ npm run start:service
 🎮 GPU: NVIDIA GeForce RTX 3080
 ```
 
+### Building the Windows Installer (.exe)
+
+AutoOC packages as an Electron app via Electron Forge.
+
+On **Windows**:
+```bash
+npm run make
+```
+
+Artifacts are written under `out/make/` (look for `AutoOC-Setup.exe`).
+
 ### Running Tests
 
 ```bash

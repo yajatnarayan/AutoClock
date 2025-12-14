@@ -79,7 +79,7 @@ AutoOC is designed as a two-tier architecture with a privileged backend service 
 
 #### Technology Stack
 - **Runtime**: Node.js (TypeScript)
-- **Service**: Windows Service (node-windows)
+- **Service**: Privileged Node.js service (packaged app runs it in-process; optional Windows Service via node-windows)
 - **GPU Interface**: nvidia-smi, NVML wrapper
 - **Logging**: Winston
 - **Storage**: File-based JSON profiles
@@ -335,31 +335,23 @@ Update best known config
 
 ### File Structure
 ```
-C:/Program Files/AutoOC/
-├── service/
-│   ├── autooc-service.exe
-│   ├── node.exe
-│   └── backend/
-│       └── [compiled JS]
-├── frontend/
-│   ├── AutoOC.exe
-│   └── resources/
-│       └── app/
-└── data/
-    ├── profiles/
-    │   └── *.json
-    ├── logs/
-    │   └── *.log
-    └── config/
-        └── service-config.json
+C:\Program Files\AutoOC\
+├── AutoOC.exe
+└── resources\
+    ├── app.asar
+    └── ...
+
+C:\Users\<user>\AppData\Roaming\AutoOC\
+├── profiles\
+│   └── *.json
+└── logs\
+    └── *.log
 ```
 
-### Service Installation
-1. Copy binaries to Program Files
-2. Install Windows service (node-windows)
-3. Configure service to auto-start
-4. Create desktop shortcut for frontend
-5. Add to Windows Firewall exceptions (localhost only)
+### Installation Notes
+- Packaged desktop builds start the local backend automatically when launched.
+- Source/development builds require starting the backend separately (`npm run dev:backend` or `npm run start:service`).
+- Installing the backend as a Windows service via `node-windows` is optional (advanced).
 
 ## Error Handling
 

@@ -60,7 +60,7 @@ Before installing, verify:
 
 1. **Download AutoOC**
    - Visit [releases page](https://github.com/yourusername/AutoOC/releases)
-   - Download `AutoOC-Setup-x.x.x.exe`
+   - Download `AutoOC-Setup.exe`
 
 2. **Run Installer**
    - Double-click the installer
@@ -68,14 +68,10 @@ Before installing, verify:
    - Follow installation wizard
    - Choose installation directory
 
-3. **Service Installation**
-   - Installer will automatically install backend service
-   - Requires administrator approval
-   - Service starts automatically
-
-4. **Launch Application**
+3. **Launch Application**
    - Desktop shortcut created automatically
    - Or find in Start Menu → AutoOC
+   - **Tip**: Run as Administrator for tuning features
 
 ### Method 2: Manual Installation
 
@@ -90,19 +86,21 @@ Before installing, verify:
    npm install
    ```
 
-3. **Build Project**
+3. **Run in Development Mode (Recommended)**
    ```bash
-   npm run build
+   npm run dev
    ```
 
-4. **Install Service**
+4. **Run the Backend Only (Optional)**
    ```bash
+   npm run build:backend
+   npm run start:service
+   ```
+
+5. **Install as a Windows Service (Advanced / Optional)**
+   ```bash
+   npm run build:backend
    npm run install-service
-   ```
-
-5. **Launch Application**
-   ```bash
-   npm start
    ```
 
 ---
@@ -393,17 +391,23 @@ After optimization, test in your workloads:
 **Symptoms**: Red status indicator, "Disconnected"
 
 **Solutions:**
-1. Check if service is running:
-   - Open Services (services.msc)
-   - Find "AutoOC" service
-   - Ensure it's "Running"
-   - If not, click "Start"
-
-2. Restart service:
+1. If you’re running from source, start the backend:
    ```bash
-   npm run uninstall-service
-   npm run install-service
+   npm run dev:backend
    ```
+   Or run everything together:
+   ```bash
+   npm run dev
+   ```
+
+2. If you installed the backend as a Windows service (advanced):
+   - Open Services (`services.msc`)
+   - Find "AutoOC" and ensure it’s running
+   - Reinstall if needed:
+     ```bash
+     npm run uninstall-service
+     npm run install-service
+     ```
 
 3. Check firewall:
    - Allow AutoOC through Windows Firewall
@@ -430,7 +434,7 @@ After optimization, test in your workloads:
 1. Close other GPU applications
 2. Update NVIDIA drivers
 3. Check cooling - may be too hot
-4. Review logs in `logs/` folder
+4. Review logs (desktop app: Help → Open Logs Folder; from source: `logs/`)
 5. Try more conservative mode (Quiet)
 
 ### Instability After Optimization

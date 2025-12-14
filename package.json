@@ -2,14 +2,13 @@
   "name": "autooc",
   "version": "0.1.0",
   "description": "Intelligent GPU Performance Tuning - Safe, automated overclocking for NVIDIA GPUs",
-  "main": "dist/main.js",
+  "main": "src/electron/main.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "ts-node-dev --respawn src/backend/service/production-service.ts",
     "dev:frontend": "electron-forge start",
-    "build": "npm run build:backend && npm run build:frontend",
+    "build": "npm run build:backend",
     "build:backend": "tsc -p tsconfig.backend.json",
-    "build:frontend": "electron-forge make",
     "start": "electron-forge start",
     "start:service": "node dist/backend/service/production-service.js",
     "test": "jest",
@@ -21,8 +20,8 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "install-service": "node scripts/install-service.js",
     "uninstall-service": "node scripts/uninstall-service.js",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
+    "package": "npm run build:backend && electron-forge package",
+    "make": "npm run build:backend && electron-forge make",
     "clean": "rimraf dist coverage"
   },
   "keywords": [
@@ -55,6 +54,7 @@
   "dependencies": {
     "@types/ws": "^8.5.10",
     "electron-store": "^8.1.0",
+    "electron-squirrel-startup": "^1.0.1",
     "express": "^4.18.2",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",

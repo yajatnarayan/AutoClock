@@ -10,10 +10,14 @@
     <div id="app">
         <!-- Header -->
         <header class="app-header">
-            <h1>AutoOC</h1>
+            <div class="header-left">
+                <h1>AutoOC</h1>
+                <span id="app-version" class="app-version"></span>
+            </div>
             <div class="header-status">
                 <span id="connection-status" class="status-indicator">●</span>
                 <span id="connection-text">Connecting...</span>
+                <button id="theme-toggle" class="header-button" type="button" title="Toggle theme">Theme</button>
             </div>
         </header>
 
@@ -77,18 +81,30 @@
             <section class="card optimization">
                 <h2>One-Click Optimization</h2>
                 <div class="optimization-modes">
-                    <button class="mode-button" data-mode="max_performance">
-                        <span class="mode-icon">⚡</span>
+                <button class="mode-button" data-mode="max_performance" type="button">
+                        <span class="mode-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="28" height="28" focusable="false">
+                                <path fill="currentColor" d="M13 2L3 14h7l-1 8 12-14h-7l-1-6z"/>
+                            </svg>
+                        </span>
                         <span class="mode-name">Max Performance</span>
                         <span class="mode-desc">Maximum FPS/Throughput</span>
                     </button>
-                    <button class="mode-button" data-mode="balanced">
-                        <span class="mode-icon">⚖️</span>
+                    <button class="mode-button" data-mode="balanced" type="button">
+                        <span class="mode-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="28" height="28" focusable="false">
+                                <path fill="currentColor" d="M12 3a2 2 0 0 0-2 2v2H5v2h1l2 7a3 3 0 0 0 3 2h2v2H8v2h8v-2h-5v-2h2a3 3 0 0 0 3-2l2-7h1V7h-5V5a2 2 0 0 0-2-2zm-4 8h2l-1.2 4.2A1 1 0 0 1 7.8 16H7a1 1 0 0 1-.96-1.3L8 11zm6 0h2l2 3.7A1 1 0 0 1 17 16h-.8a1 1 0 0 1-.96-.8L14 11z"/>
+                            </svg>
+                        </span>
                         <span class="mode-name">Balanced</span>
                         <span class="mode-desc">Best Performance/Watt</span>
                     </button>
-                    <button class="mode-button" data-mode="quiet">
-                        <span class="mode-icon">🔇</span>
+                    <button class="mode-button" data-mode="quiet" type="button">
+                        <span class="mode-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="28" height="28" focusable="false">
+                                <path fill="currentColor" d="M16.5 12l3.5 3.5-1.5 1.5L15 13.5 11.5 17H9v-5H6v-4h3V3h2.5L15 6.5l3.5-3.5L20 4.5 16.5 8l3.5 3.5-1.5 1.5L16.5 12z"/>
+                            </svg>
+                        </span>
                         <span class="mode-name">Quiet</span>
                         <span class="mode-desc">Thermal & Noise Limited</span>
                     </button>
@@ -112,26 +128,45 @@
                         <span id="profile-clocks">Core: +0MHz | Memory: +0MHz</span>
                     </div>
                 </div>
-                <button id="manage-profiles-btn" class="secondary-button">Manage Profiles</button>
+                <button id="manage-profiles-btn" class="secondary-button" type="button">Manage Profiles</button>
             </section>
         </main>
 
         <!-- Profiles Modal -->
-        <div id="profiles-modal" class="modal hidden">
+        <div id="profiles-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profiles-modal-title">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Manage Profiles</h2>
-                    <button class="close-button" id="close-modal">&times;</button>
+                    <h2 id="profiles-modal-title">Manage Profiles</h2>
+                    <button class="close-button" id="close-modal" type="button" aria-label="Close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div id="profiles-list" class="profiles-list"></div>
                 </div>
                 <div class="modal-footer">
-                    <button id="import-profile-btn" class="secondary-button">Import Profile</button>
+                    <button id="import-profile-btn" class="secondary-button" type="button">Import Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="confirm-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+            <div class="modal-content modal-content--small">
+                <div class="modal-header">
+                    <h2 id="confirm-title">Confirm</h2>
+                    <button class="close-button" id="confirm-close" type="button" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-message"></p>
+                </div>
+                <div class="modal-footer modal-footer--split">
+                    <button id="confirm-cancel" class="secondary-button" type="button">Cancel</button>
+                    <button id="confirm-ok" class="primary-button" type="button">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Application JavaScript -->
     <script src="app.js"></script>
