@@ -6,7 +6,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export interface WSMessage {
   id: string;

@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Profile, TuningConfiguration, OptimizationMode, BenchmarkResult } from '../types';
 import { NvidiaAPI } from '../hardware/nvidia-api';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class ProfileManager {
   private profilesDir: string;

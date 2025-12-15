@@ -257,6 +257,30 @@ export class AutoOCProductionService extends EventEmitter {
       return;
     }
 
+    // SAFETY CHECK: Verify GPU temperature is safe before starting
+    try {
+      const currentTelemetry = await this.gpuInterface.getTelemetry();
+
+      if (currentTelemetry.temperature > 65) {
+        respondError(
+          `GPU temperature too high for optimization: ${currentTelemetry.temperature}°C. ` +
+          `Please wait for GPU to cool below 65°C before starting optimization.`
+        );
+        logger.warn('AutoOCService', 'Optimization blocked - GPU too hot', {
+          temperature: currentTelemetry.temperature,
+        });
+        return;
+      }
+
+      logger.info('AutoOCService', 'Temperature check passed', {
+        temperature: currentTelemetry.temperature,
+      });
+    } catch (error) {
+      logger.error('AutoOCService', 'Failed to check GPU temperature', error);
+      respondError('Failed to check GPU temperature before optimization');
+      return;
+    }
+
     // Respond immediately that optimization has started
     respond({ status: 'started', mode });
 
@@ -529,6 +553,71 @@ export function getService(config?: Partial<ServiceConfig>): AutoOCProductionSer
   }
   return serviceInstance;
 }
+
+/**
+ * Graceful shutdown handler
+ * CRITICAL: Ensures GPU is reset to safe state on service termination
+ */
+async function gracefulShutdown(signal: string): Promise<void> {
+  logger.warn('AutoOCService', `Received ${signal} - Initiating graceful shutdown`);
+
+  try {
+    if (serviceInstance) {
+      logger.info('AutoOCService', 'Stopping service and resetting GPU to safe state');
+
+      // Stop the service (this will reset GPU to stock)
+      await serviceInstance.stop();
+
+      logger.info('AutoOCService', 'Graceful shutdown complete');
+    }
+  } catch (error) {
+    logger.error('AutoOCService', 'Error during graceful shutdown', error);
+  } finally {
+    // Force exit after shutdown attempt
+    process.exit(0);
+  }
+}
+
+/**
+ * Register shutdown handlers
+ * This ensures GPU is always reset to stock settings on exit
+ */
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));
+
+// Handle uncaught exceptions - emergency GPU reset
+process.on('uncaughtException', async (error) => {
+  logger.error('AutoOCService', 'UNCAUGHT EXCEPTION - Emergency shutdown', error);
+
+  try {
+    if (serviceInstance) {
+      // Emergency rollback
+      const profileManager = (serviceInstance as any).profileManager;
+      const knownGood = profileManager?.getKnownGoodProfile();
+
+      if (knownGood) {
+        logger.warn('AutoOCService', 'Applying known-good profile before crash');
+        await profileManager.applyProfile(knownGood.id);
+      }
+    }
+  } catch (rollbackError) {
+    logger.error('AutoOCService', 'Emergency rollback failed', rollbackError);
+  } finally {
+    process.exit(1);
+  }
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', async (reason, promise) => {
+  logger.error('AutoOCService', 'UNHANDLED PROMISE REJECTION', {
+    reason,
+    promise,
+  });
+
+  // Don't exit on unhandled rejection, but log it
+  // The service should continue running
+});
 
 /**
  * Main entry point when run as a service

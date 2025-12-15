@@ -4,7 +4,7 @@
 
 import { BenchmarkResult, TuningConfiguration } from '../types';
 import { TelemetryCollector } from '../hardware/telemetry-collector';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class Benchmark {
   private telemetryCollector: TelemetryCollector;

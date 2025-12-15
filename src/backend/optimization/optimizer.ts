@@ -16,7 +16,7 @@ import { NvidiaAPI } from '../hardware/nvidia-api';
 import { TelemetryCollector } from '../hardware/telemetry-collector';
 import { Benchmark } from './benchmark';
 import { StabilityValidator } from '../stability/validator';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class Optimizer extends EventEmitter {
   private nvapi: NvidiaAPI;

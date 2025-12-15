@@ -18,7 +18,7 @@ import {
   FanCurvePoint,
   ThrottleReason,
 } from '../types';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 const execAsync = promisify(exec);
 

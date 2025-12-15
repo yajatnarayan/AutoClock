@@ -8,7 +8,7 @@ import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 import { NVMLWrapper } from '../hardware/nvml-wrapper';
 
 const execAsync = promisify(exec);

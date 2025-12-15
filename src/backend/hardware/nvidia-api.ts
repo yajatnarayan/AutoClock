@@ -6,7 +6,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { GPUInfo, GPUTelemetry, ThrottleReason, ClockOffset } from '../types';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 const execAsync = promisify(exec);
 

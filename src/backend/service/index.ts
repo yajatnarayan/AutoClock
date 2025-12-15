@@ -16,7 +16,7 @@ import {
   OptimizationMode,
   Profile,
 } from '../types';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class AutoOCService extends EventEmitter {
   private nvapi: NvidiaAPI;

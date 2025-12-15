@@ -6,7 +6,7 @@
 import { EventEmitter } from 'events';
 import { NvidiaAPI } from './nvidia-api';
 import { GPUTelemetry } from '../types';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 class RingBuffer<T> {
   private buffer: Array<T | undefined>;

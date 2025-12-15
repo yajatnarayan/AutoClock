@@ -6,7 +6,7 @@
 import { BenchmarkResult, TuningConfiguration } from '../types';
 import { TelemetryService } from '../hardware/telemetry-service';
 import { WorkloadRunner, WorkloadResult } from './workload-runner';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class BenchmarkEngine {
   private telemetryCollector: TelemetryService;

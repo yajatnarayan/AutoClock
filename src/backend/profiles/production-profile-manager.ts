@@ -207,7 +207,7 @@ export class ProductionProfileManager {
     benchmarkResult?: BenchmarkResult
   ): Profile {
     const profile: Profile = {
-      id: `profile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `profile-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       name,
       description,
       configuration,
@@ -425,9 +425,11 @@ export class ProductionProfileManager {
         throw new Error(`Invalid profile: ${validation.errors.join(', ')}`);
       }
 
+      // SECURITY: Force safety flags on imported profiles
       // Generate new ID to avoid conflicts
-      profile.id = `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      profile.id = `imported-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
       profile.isActive = false;
+      profile.isDefault = false; // CRITICAL: Never allow imported profiles to be default
       profile.createdAt = Date.now();
       profile.updatedAt = Date.now();
 

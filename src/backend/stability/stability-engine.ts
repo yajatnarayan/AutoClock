@@ -8,7 +8,7 @@ import { TelemetryService } from '../hardware/telemetry-service';
 import { WindowsEventMonitor } from '../hardware/windows-event-monitor';
 import { WorkloadRunner } from '../benchmarking/workload-runner';
 import { IGPUInterface } from '../hardware/gpu-interface';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/production-logger';
 
 export class StabilityEngine {
   private telemetryCollector: TelemetryService;
