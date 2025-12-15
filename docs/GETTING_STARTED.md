@@ -59,7 +59,7 @@ Before installing, verify:
 ### Method 1: Installer (Recommended)
 
 1. **Download AutoOC**
-   - Visit [releases page](https://github.com/yourusername/AutoOC/releases)
+   - Download the latest installer from the project's Releases page
    - Download `AutoOC-Setup.exe`
 
 2. **Run Installer**
@@ -77,7 +77,7 @@ Before installing, verify:
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/yourusername/AutoOC.git
+   git clone <repository-url>
    cd AutoOC
    ```
 
@@ -511,7 +511,7 @@ After optimization, test in your workloads:
 
 - Read [ROADMAP.md](ROADMAP.md) for future features
 - Check [ARCHITECTURE.md](ARCHITECTURE.md) for technical details
-- Join community discussions
+- Review the [documentation index](README.md) for all entry points
 
 ### Advanced Usage (Future)
 
@@ -522,9 +522,11 @@ After optimization, test in your workloads:
 
 ### Get Help
 
-- Check [GitHub Issues](https://github.com/yourusername/AutoOC/issues)
-- Join Discord community
-- Read FAQ
+- Review logs (desktop app: Help → Open Logs Folder; from source: `logs/`)
+- Open an issue in the project's issue tracker and include:
+  - GPU model + driver version
+  - the steps that reproduce the problem
+  - relevant log files
 
 ---
 
@@ -536,4 +538,4 @@ Overclocking carries inherent risks. While AutoOC includes extensive safety mech
 
 ---
 
-**Welcome to the AutoOC community! Enjoy your optimized GPU! 🚀**
+**Enjoy your optimized GPU.**

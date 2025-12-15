@@ -1,6 +1,7 @@
 {
   "name": "autooc",
   "version": "0.1.0",
+  "private": true,
   "description": "Intelligent GPU Performance Tuning - Safe, automated overclocking for NVIDIA GPUs",
   "main": "src/electron/main.js",
   "scripts": {

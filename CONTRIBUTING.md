@@ -44,7 +44,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/AutoOC.git
+   git clone <your-fork-url>
    cd AutoOC
    ```
 
@@ -365,9 +365,8 @@ Maintain API docs for:
 
 ## Questions?
 
-- Open a [Discussion](https://github.com/yourusername/AutoOC/discussions)
-- Join our Discord server
-- Check existing [Issues](https://github.com/yourusername/AutoOC/issues)
+- Start a discussion in the project's repository (if enabled)
+- Check existing issues in the project's issue tracker
 
 ## Recognition
 
@@ -376,4 +375,4 @@ Contributors will be recognized in:
 - Release notes
 - Project website (future)
 
-Thank you for contributing to AutoOC! 🚀
+Thank you for contributing to AutoOC!

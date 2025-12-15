@@ -429,11 +429,12 @@ logger.error('Component', 'Error', error);
 
 ## Documentation
 
-- **Architecture**: See [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Roadmap**: See [ROADMAP.md](ROADMAP.md)
-- **User Guide**: See [GETTING_STARTED.md](GETTING_STARTED.md)
+- **Docs index**: See [docs/README.md](docs/README.md)
+- **Architecture**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Roadmap**: See [docs/ROADMAP.md](docs/ROADMAP.md)
+- **User Guide**: See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 - **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
-- **Ship Status**: See [SHIP_CHECKLIST.md](SHIP_CHECKLIST.md)
+- **Ship Status**: See [docs/dev/SHIP_CHECKLIST.md](docs/dev/SHIP_CHECKLIST.md)
 - **Stress Testing**: See [docs/STRESS_TESTING.md](docs/STRESS_TESTING.md)
 
 ---

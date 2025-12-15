@@ -7,6 +7,9 @@ dist/
 build/
 out/
 
+# Local app data (created by tests/dev runs)
+/AppData/
+
 # Logs
 /logs/
 *.log
