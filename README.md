@@ -63,9 +63,13 @@ npm install
 npm run make
 ```
 
-Artifacts are written under `out/make/` (look for `AutoOC-Setup.exe`).
+Artifacts are written under `out/make/squirrel.windows/x64/AutoOC-Setup.exe`.
 
-If you’re developing on macOS/Linux, build the Windows installer via GitHub Actions: `.github/workflows/windows-installer.yml`.
+**For detailed build instructions**, see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
+
+**For end-user installer documentation**, see [INSTALLER_README.md](INSTALLER_README.md).
+
+**Note**: Building Windows installers requires a Windows machine or VM. macOS/Linux can only produce ZIP archives. For CI/CD, use GitHub Actions with a Windows runner.
 
 ## Contributing
 
